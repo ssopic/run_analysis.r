@@ -1,0 +1,75 @@
+#Getting the data
+setwd("C:\\Users\\ssopic\\Desktop\\Coursera\\3. Getting and cleaning data\\Week4\\UCI HAR Dataset\\total")
+#IDs
+subject_train <- read.table("subject_train.txt")
+subject_test <- read.table("subject_test.txt")
+  #naming the collumns of the id variable
+names(subject_test) <- "idsubject"
+names(subject_train) <- "idsubject"
+
+#Variables
+x_test <- read.table("X_test.txt")
+x_train <- read.table("X_train.txt")
+
+#Labels for which activity was measured
+y_test <- read.table("y_test.txt")
+y_train <- read.table("y_train.txt")
+#Naming the y variables as activity
+names(y_test) <- "activity"
+names(y_train) <- "activity"
+
+
+#list of all featues
+features <- read.table("features.txt")
+features$V1 #The index for the features 
+features$V2 #The features themselves
+#The features themselves need to be added to the x train and test as those are the names of the variables
+names(x_test) <- features$V2
+names(x_train) <- features$V2
+
+
+#1.Merges the training and the test sets to create one data set.
+#First we need to assemble the divided data for the train and test
+train <- cbind(subject_train, y_train, x_train)
+test <- cbind(subject_test, y_test, x_test)
+
+#Files combined into one dataset called combined.
+combined <- rbind(train, test)
+#2.Extracts only the measurements on the mean and standard deviation for each measurement.
+#The measurements need to be extracted using the grepl function
+#When viewing names(combined) we see that the mean and standard deviation are in a string looking like this "text-std()" and "text-mean()" so we need to take that into account when looking for that specific pattern. However, the parenthesis are reserved characters so we need to escape them using \\
+meanstddevmeasurement <- grepl("mean\\(\\)",names(combined)) | 
+  grepl("std\\(\\)", names(combined))
+
+#We want to keep the ids
+meanstddevmeasurement[1:2] <- TRUE
+
+#Create a new table containing only appropriate data
+meanstd <- combined[meanstddevmeasurement]
+
+#3.Uses descriptive activity names to name the activities in the data set
+
+#We know from the readme that the 6 activities measured were walking, walking upstairs, walking downstairs, sitting, standing, and laying so we add these to the activities. From the activity labels we understand the meaning of these numbers.
+#1 WALKING
+#2 WALKING_UPSTAIRS
+#3 WALKING_DOWNSTAIRS
+#4 SITTING
+#5 STANDING
+#6 LAYING
+#When naming we will use these names, lowercase and without the underscore symbol
+
+
+#4.Appropriately labels the data set with descriptive variable names.
+#To do this we load the plyr package and use the revalue. The revalue function works only on factors so we need to change the (activity) numeric column into a factor column.
+library(plyr)
+meanstd$activity <- as.factor(meanstd$activity)
+
+meanstd$activity <- revalue(meanstd$activity, c("1"="walking", "2"="walkingupstairs", "3"="walkingdownstairs", "4"="sitting", "5"="standing", "6"="laying"))
+
+#5.From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+library(reshape2)
+#melting the data with the ids
+melteddata <- melt(meanstd, id=c("idsubject","activity"))
+tidydata <- dcast(melteddata, idsubject+activity ~ variable, mean)
+#Saving the data
+write.table(tidydata, "C:\\Users\\ssopic\\Desktop\\Coursera\\3. Getting and cleaning data\\Week4\\UCI HAR Dataset\\total\\tidy.csv", row.names=FALSE)
