@@ -8,9 +8,16 @@ https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Datas
   
   The data
 
-  The data was divided into the training and testing with 70% assigned to the training set. These sets were then divided into three tables containing the activity number (view above), the id of the subjects(numbers 1-30), and the data on the measured variables with means, standard deviations and other. 
+  The data was divided into the training and testing with 70% assigned to the training set. These sets were then divided into three tables containing the activity number (view above), the id of the subjects(numbers 1-30), and the data on the measured variables with means, standard deviations and other. The tables are described below
+  X_train and X_test contain the training and testing data from the measured variables. These contained the gyro and accelerometer data. 
+  Y_train and Y_test contain the activities in numeric, 1 to 6-
+  subject_train and subject_test contain the ids of the usbjects.
+  activity_labels.txt contain the meaning behind each coded activity from Y_train and Y_test,
+  features.txt contain the names of the variables measured(in X_train and X_test)
+  
   
 Transformations to get to the tidy data
+
   We first introduced the data tables into R using the read.table command resulting in six tables(subject_train and subject_test containing the ids of the subjects, x_test and x_train containing the measured variables, and y_test and y_train containing activity numbers). First we combined the tables of the training and testing datasets by collumn and then combined the resulting tables together by rows. 
     Having the full dataset I extracted the measures for the standard deviation and the mean using a combination of the grepl function of the plyr packag(Wickham, 2011)e and subsetting while making sure to keep the id of the participants and exactly which activity was measured. 
     The activities were named with numbers ranging from one to six so using the activity list found in the full data package(view above). To label them, we used the plyr package(Wickham, 2011). 
